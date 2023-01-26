@@ -8,7 +8,7 @@ from label_studio_ml.utils import (get_choice, get_local_path,
                                    get_single_tag_keys, is_skipped)
 from requests import Response
 
-model_endpoint = ""
+model_endpoint = "https://isjghav76e.execute-api.ap-south-1.amazonaws.com/dev/inference"
 
 
 def inference(url):
@@ -20,14 +20,14 @@ def inference(url):
         prefix = f"data:image/{ext};base64,"
         base64_data = prefix + base64.b64encode(f.read()).decode("utf-8")
 
-    payload = json.dumps({"data": [base64_data]})
+    payload = json.dumps({"body": [base64_data]})
 
     headers = {"Content-Type": "application/json"}
 
     response: Response = requests.request(
         "POST", model_endpoint, headers=headers, data=payload, timeout=15
     )
-    data = json.loads(response.get_data(as_text=True))["body"]
+    data = response.json()[0]
 
     label = max(data, key=data.get)
     score = data[label]
