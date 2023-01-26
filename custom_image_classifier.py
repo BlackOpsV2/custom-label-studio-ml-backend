@@ -2,20 +2,23 @@ import base64
 import json
 import random
 
+import boto3
 import requests
 from label_studio_ml.model import LabelStudioMLBase
 from label_studio_ml.utils import (get_choice, get_local_path,
                                    get_single_tag_keys, is_skipped)
 from requests import Response
 
+s3 = boto3.client('s3')
 model_endpoint = "https://isjghav76e.execute-api.ap-south-1.amazonaws.com/dev/inference"
 
-
-def inference(url):
-
-    image_path = get_local_path(url)
-
-    with open(image_path, "rb") as f:
+def inference(image_path):
+    print(image_path)
+    image_path = image_path.replace('s3://', '')
+    bucker_name, image_path = image_path.split('/')[0], '/'.join(image_path.split('/')[1:])
+    s3.download_file(bucker_name, image_path, 'image.jpg')
+    
+    with open("image.jpg", "rb") as f:
         ext = image_path.split(".")[-1]
         prefix = f"data:image/{ext};base64,"
         base64_data = prefix + base64.b64encode(f.read()).decode("utf-8")
@@ -27,6 +30,8 @@ def inference(url):
     response: Response = requests.request(
         "POST", model_endpoint, headers=headers, data=payload, timeout=15
     )
+    
+    print(response)
     data = response.json()[0]
 
     label = max(data, key=data.get)
@@ -34,7 +39,6 @@ def inference(url):
 
     print(f"\t :: {image_path} -> ", label, " | ", score)
     return label, score
-
 
 class ImageClassifierAPI(LabelStudioMLBase):
     def __init__(self, **kwargs):
