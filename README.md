@@ -1,5 +1,5 @@
 ## Overview 
-This is the Label Studio ML Backend for Image classification with the possibility of transfer learning. 
+This is the Label Studio ML Backend for Custom Model Deployed at Url . 
 
 ## Quickstart
 
@@ -16,36 +16,53 @@ $ curl http://localhost:9090/health
 {"status":"UP"}
 ```
 
-Then connect running backend to Label Studio:
+## Then connect running backend to Label Studio:
+
+### How it works
+
+1. Get your model code
+2. Wrap it with the Label Studio SDK
+3. Create a running server script
+4. Launch the script
+5. Connect Label Studio to ML backend on the UI
+
+
+0. Clone the repo
+   ```bash
+   git clone https://github.com/heartexlabs/label-studio-ml-backend  
+   ```
+   
+1. Setup environment
+    
+    It is highly recommended to use `venv`, `virtualenv` or `conda` python environments. You can use the same environment as Label Studio does. [Read more](https://docs.python.org/3/tutorial/venv.html#creating-virtual-environments) about creating virtual environments via `venv`.
+   ```bash
+   cd label-studio-ml-backend
+   
+   # Install label-studio-ml and its dependencies
+   pip install -U -e .
+   
+   # Install example dependencies
+   pip install -r label_studio_ml/examples/requirements.txt
+   ```
+2. Copy above repo to `label_studio_ml/examples/`
+
+3. Initialize an ML backend based on an example script:
+   ```bash
+   label-studio-ml init my_ml_backend --script label_studio_ml/examples/custom-label-studio-ml-backend/custom_image_classifier.py
+   ```
+   This ML backend is an example provided by Label Studio. See [how to create your own ML backend](#create-your-own-ml-backend).
+
+4. Start ML backend server
+   ```bash
+   label-studio-ml start my_ml_backend
+   ```
+   
+5. Start Label Studio and connect it to the running ML backend on the project settings page.
+
 
 ```bash
 label-studio start --init new_project --ml-backends http://localhost:9090 --template image_classification
 ```
-
-
-## Writing your own model
-1. Place your scripts for model training & inference inside root directory. Follow the [API guidelines](#api-guidelines) described bellow. You can put everything in a single file, or create 2 separate one say `my_training_module.py` and `my_inference_module.py`
-
-2. Write down your python dependencies in `requirements.txt`
-
-3. Create ML backend with your model
-```bash
-label-studio-ml init my-ml-backend --script pytorch_transfer_learning/pytorch_transfer_learning.py
-```
-
-4. Start ML backend at http://localhost:9090
-```bash
-label-studio-ml start my-ml-backend
-```
-
-5. Start Label Studio with ML backend connection
-```bash
-label-studio start my-annotation-project --init --ml-backend http://localhost:9090
-```
-   
-## API guidelines
-
-Check out https://github.com/heartexlabs/label-studio-ml-backend/tree/master#Create_your_own_ML_backend
 
 ## License
 
